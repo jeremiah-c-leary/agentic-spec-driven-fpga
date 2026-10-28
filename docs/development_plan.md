@@ -58,6 +58,14 @@ change (section 7.4) and needs the owner's approval and a decision-log entry.
    `.claude/`, CI workflows or policy files.
 7. **Every intervention is recorded.** Each time the owner steps in, it is
    logged by category (section 13). The log is part of the result.
+8. **Every change is a commit.** No change to the repository is left
+   uncommitted, and each commit holds one logical change. Agents commit their
+   own work under their own names. Changes made from the Claude chat
+   (planning and documentation) are written by the chat and committed by the
+   owner, with the chat recorded as author
+   (`--author="Claude (chat) <claude-chat@localhost>"`, trailer
+   `Agent: claude-chat`). The chat cannot run git; it writes files, and the
+   owner reviews and commits them.
 
 ## 4. Roles
 
@@ -71,6 +79,7 @@ change (section 7.4) and needs the owner's approval and a decision-log entry.
 | reviewer | Subagent | M1 | Nothing (read-only) | - |
 | physical-engineer | Subagent | M2 | Constraints, Vivado build, release package | `tb/`, `hwtest/` |
 | integration-engineer | Subagent | M2 | `hwtest/`, programs the board | `rtl/`, `tb/` |
+| Claude (chat) | Chat assistant | M0 | `docs/`, with the owner's review | Never commits; does not edit `spec/` |
 
 **Spec-architect.** Interviews the owner and turns the answers into the
 specification: feature files, block diagram, interface contracts, project
@@ -92,6 +101,13 @@ every failure as an RTL bug, a test bug or a spec gap.
 **Physical-engineer and integration-engineer** join in M2. Their roles, the
 release package and its hand-off checklist will be planned in detail in the
 M2 section.
+
+**Claude (chat).** Planning, documentation and design discussion with the
+owner, from the Claude desktop app. Reads the repository to review real
+files; writes only what the owner asks for, mainly in `docs/`. Does not edit
+`spec/`, which stays the spec-architect's: if a discussion changes the
+design, the decision goes to the spec-architect. Cannot run git; the owner
+commits its changes (principle 8).
 
 **How agents communicate.** In this project the agents run as *subagents*,
 which never message each other directly. Information flows through a main
