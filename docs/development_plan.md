@@ -341,8 +341,8 @@ isolation rather than guardrails) is a later hardening option.
 | Milestone | Slice | New risk it retires |
 |---|---|---|
 | **M0** | Environment, tools, process tooling, local CI | Tooling and process infrastructure |
-| **M1** | PTP filter rebuilt from its spec, simulation only | Spec-to-RTL with independent agents |
-| M2 | Board reports its build ID over UART | The whole chain on hardware |
+| **M1** | Board reports its build ID over UART, simulation only | Spec-to-RTL with independent agents, on the first real design |
+| M2 | The M1 design on the board: build, program, hardware test | The whole chain on hardware |
 | M3 | Ethernet pass-through, port A to port B | PHY interfaces, clocking, I/O timing |
 | M4 | One filter rule, then the red-to-green demonstration | The spec-change loop on hardware |
 | M5 | Timed rehearsals of the ten-minute loop | Speed and repeatability |
@@ -402,49 +402,58 @@ workflow apply from the end of M0.
 - The policy decisions are in the decision log.
 - M0 retrospective written; this plan updated.
 
-### 12.2 M1: PTP filter rebuilt from its spec, simulation only
+### 12.2 M1: Build ID over UART, simulation only
 
-**Goal:** show that independent agents can produce a working design from the
-specification alone, measured against a known-good reference.
+**Goal:** take the first real design of the project through the whole flow
+(spec, review, freeze, build) in simulation. The same design goes onto the
+board in M2, so M1 produces both the design and the first evidence that the
+process works.
 
-**Inputs**
+**Design scope.** A minimal design that reports, over a UART, the build ID
+it was built with. The details are settled in the spec phase interview, not
+in this plan. Topics the spec-architect must cover with the owner include:
 
-- The PTP Delay_Req filter spec already in `spec/`.
-- A **golden reference**: the verified RTL and testbench from the original
-  design conversation, kept **outside the repository**, where no agent is
-  pointed to it. It is used only in step 7.
+- what the build ID is (commit or design ID, length, format);
+- how it enters the design (e.g. a top-level generic set at build time, and
+  by the testbench in simulation);
+- when it is sent (at reset, periodically, or on request);
+- the UART format (baud rate, framing);
+- the clock frequency (a generic until the board is chosen, O-9);
+- whether a UART-to-register bridge is included now, as the base for the
+  observability later milestones need (counters, status).
+
+**Inputs:** the owner's answers in the interview. The PTP Delay_Req filter
+spec currently in `spec/` is **not** an input; it was an experiment to judge
+the quality of the agents' VHDL, and is moved out of `spec/` before M1
+starts (O-11).
 
 **Steps**
 
-1. Create the change branch `cr/001-m1-ptp-rebuild`.
-2. **Spec phase** with the spec-architect: resolve the six REVIEW markers in
-   the feature file and the unconfirmed decision D-012; write the subsystem
-   feature files (or record waivers); complete the checklist.
-3. **Review phase:** readiness review until no blockers or majors remain.
-4. **Freeze:** the owner runs `set_phase build` (`spec-frozen-1`).
-5. **Build phase** with the build-orchestrator (section 6), pushing to Forgejo
+1. Create the change branch `cr/001-m1-build-id-uart`.
+2. Clear `spec/` of the PTP design as decided in O-11, keeping the
+   design-independent files (style guide, checklist).
+3. **Spec phase** with the spec-architect: interview, artifacts, checklist.
+4. **Review phase:** readiness review until no blockers or majors remain.
+5. **Freeze:** the owner runs `set_phase build` (`spec-frozen-1`).
+6. **Build phase** with the build-orchestrator (section 6), pushing to Forgejo
    so CI runs on every change.
-6. **Pull request** on Forgejo with CI green and the reviewer's verdict.
-7. **Golden comparison**, run by the owner:
-   1. the golden testbench against the agents' RTL;
-   2. the agents' testbench against the golden RTL;
-   3. resource estimates compared (golden: about 365 LUTs, 959 flip-flops,
-      Yosys estimate), for information.
-
-   Any disagreement is triaged as an RTL bug, a test bug or a spec gap. Spec
-   gaps are the most valuable finding: they show where the spec was not enough.
-8. **Merge** by the owner (fast-forward), tag `m1-complete`, publish to GitHub.
-9. **Retrospective**, and plan M2 in this document.
+7. **Pull request** on Forgejo with CI green and the reviewer's verdict.
+8. **Owner's code review** of the generated VHDL, recorded as an assessment
+   in the evidence folder: quality, style, anything a human designer would
+   have done differently.
+9. **Merge** by the owner (fast-forward), tag `m1-complete`, publish to GitHub.
+10. **Retrospective**, and plan M2 in this document.
 
 **Exit criteria (fixed before the run)**
 
 - All gates pass, locally and in CI; VSG `jcl` reports zero violations.
 - The reviewer's verdict is READY.
-- The golden testbench passes against the agents' RTL with no failures.
-- The agents' testbench passes against the golden RTL, or each failure is
-  triaged and resolved.
+- Every scenario example row is covered by a passing test (traceability
+  complete).
+- Every entry in `rtl/ASSUMPTIONS.md` is resolved or accepted by the owner.
 - **No rule breaks:** the owner wrote no design or test code. (If one becomes
   unavoidable, it is logged as a rule break, not hidden.)
+- Owner's code review recorded.
 - Interventions logged; metrics recorded (section 13).
 - Retrospective written; M2 planned in this document.
 
@@ -473,9 +482,8 @@ Recorded for every milestone, in `docs/evidence/mN/`:
 |---|---|---|
 | Agents ignore or work around instructions | Independence or gates compromised | Hooks, CI as independent judge, reviewer, intervention log |
 | Hooks are guardrails, not walls | A determined agent could reach forbidden files | Logged as known limit; separate Linux user for agents as later hardening |
-| Same model, same blind spots | Design and tests share a misreading | Different models for designer and verifier; golden comparison in M1 |
+| Same model, same blind spots | Design and tests share a misreading | Different models for designer and verifier; reviewer triage; owner's code review |
 | Spec ambiguity | Agents guess | Readiness review; `ASSUMPTIONS.md`; spec gaps stop the build |
-| Golden reference visible to agents | Comparison no longer independent | Kept outside the repository, never referenced in prompts |
 | WSL services stop when WSL idles | CI unavailable | Keep WSL running; check service status at session start |
 | Forgejo data loss | Pull-request and CI history lost | Periodic backups of the data directory |
 | Orchestrator leaks details between agents | Independence weakened | Structured failure reports passed unchanged |
@@ -494,3 +502,4 @@ Recorded for every milestone, in `docs/evidence/mN/`:
 | O-8 | Who approves warning waivers, and how (ELFWS is the mechanism) | M2 |
 | O-9 | Development board selection (trade study) | M2 |
 | O-10 | Try agent teams (direct messaging) for the readiness review, as a later experiment? | After M1 |
+| O-11 | What happens to the PTP filter spec in `spec/`: move to an `examples/` directory as a reference, or remove it (it remains in git history)? | M1 |
