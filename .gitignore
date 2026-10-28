@@ -218,3 +218,28 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ------------------------------------------------------------------------------
+# Agentic spec-driven FPGA flow
+# ------------------------------------------------------------------------------
+# Gate output is regenerated on every run; keep only the readiness review,
+# which records answered questions and is required to freeze the spec.
+reports/*
+!reports/.gitkeep
+!reports/readiness_review.md
+
+# GHDL work library (build/ is also ignored above)
+*.cf
+
+# Vivado
+.Xil/
+*.jou
+*.str
+vivado_pid*.zip
+usage_statistics_webtalk.*
+.hw/
+.cache/
+*.runs/
+*.sim/
+*.gen/
+*.ip_user_files/

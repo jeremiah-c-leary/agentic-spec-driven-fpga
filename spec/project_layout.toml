@@ -1,0 +1,56 @@
+# ==============================================================================
+# project_layout.toml - directory structure of the RTL project.
+#
+# Owned by the spec-architect (changed only with the user's approval).
+# Enforced by tools/layout.py:
+#   - in the spec phase, by tools/spec_check.py (contracts, features exist)
+#   - in the build phase, by the "layout" gate in tools/run_gates.sh
+#
+# Rules enforced in the build phase:
+#   - every .vhd file under rtl/ lives directly in a directory declared here
+#   - one entity per file, file named <entity>.vhd (lower case)
+#   - each unit's entities live in that unit's rtl_dir
+#   - the top-level rtl_dir contains only the top entity (structural)
+#   - entities not declared here may only appear in [project].shared_dir
+#   - every unit that has a feature file has at least one tb_* test in its tb_dir
+# ==============================================================================
+
+[project]
+name         = "ethernet_packet_filter"
+packages_dir = "pkg"             # shared interface packages (contracts)
+shared_dir   = "rtl/common"      # generic reusable blocks, e.g. synchronisers
+
+# ------------------------------------------------------------------------------
+# Top level: structural only (instances and wires)
+# ------------------------------------------------------------------------------
+[top]
+entity    = "ethernet_packet_filter"
+rtl_dir   = "rtl/top"
+tb_dir    = "tb/top"
+feature   = "spec/features/ethernet_packet_filter.feature"
+interface = "spec/interface/ethernet_packet_filter.vhd"
+
+# ------------------------------------------------------------------------------
+# Subsystems. One table per subsystem.
+#   entity             subsystem top entity (has an interface contract)
+#   internal_entities  other entities allowed in this subsystem's rtl_dir
+#   feature            block-level feature file, or
+#   feature_waiver     decision ID in spec/decisions.md that waives it
+# ------------------------------------------------------------------------------
+[[subsystem]]
+name              = "checker"
+entity            = "checker"
+internal_entities = []
+rtl_dir           = "rtl/checker"
+tb_dir            = "tb/checker"
+feature           = "spec/features/checker.feature"
+interface         = "spec/interface/checker_entity.vhd"
+
+[[subsystem]]
+name              = "stats"
+entity            = "stats_axil"
+internal_entities = []
+rtl_dir           = "rtl/stats"
+tb_dir            = "tb/stats"
+feature           = "spec/features/stats_axil.feature"
+interface         = "spec/interface/stats_axil_entity.vhd"
