@@ -1,8 +1,8 @@
 # Agentic Spec-Driven FPGA Development - project overview (shared by every session)
 
 Spec-driven FPGA development with independent agents. The flow (agents,
-tools, phases) is reusable; the current design is the PTP Delay_Req filter
-(see spec/project_layout.toml). The work happens in
+tools, phases) is reusable; the current design is declared in
+`spec/project_layout.toml`. The work happens in
 three phases, recorded in `spec/PHASE` and changed only with
 `tools/set_phase.sh` and the user's approval.
 

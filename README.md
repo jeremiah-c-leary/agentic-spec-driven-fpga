@@ -75,11 +75,10 @@ file, or a unit with a feature file but no tests.
 ## Trying the specification phase
     claude --agent spec-architect
 
-Then, for example: *"Audit the existing spec and walk me through what is
-missing."* The current spec is the PTP Delay_Req filter. Out of the box,
-`python3 tools/spec_check.py` reports what the architect will work on with
-you: two missing subsystem feature files, the open REVIEW markers, one
-unconfirmed decision (D-012) and the unticked checklist.
+Then, for example: *"Start a new design: interview me."* At any point,
+`python3 tools/spec_check.py` reports what is still missing (feature files,
+interface contracts, decisions, unticked checklist items), which is what the
+architect will work through with you.
 
 The architect stops before the freeze if you tell it you only want to try
 the specification phase. Nothing can be written to `rtl/` or `tb/` until
