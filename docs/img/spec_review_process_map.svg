@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="1165" viewBox="0 0 680 1165" role="img">
+<title>Spec and review phase process map</title>
+<desc>Four lanes: you, the spec-architect, the review agents, and files. You run set_phase yourself at both gates; the spec-architect starts the readiness review after your gate. Tool runs are dashed boxes in the lane of whoever runs them.</desc>
+<style>
+  text { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  .th { font-size: 14px; font-weight: 600; fill: #2C2C2A; }
+  .ts { font-size: 12px; fill: #5F5E5A; }
+  .lane { fill: #FFFFFF; stroke: #B4B2A9; stroke-width: 0.5; }
+  .gray rect { fill: #F1EFE8; stroke: #5F5E5A; stroke-width: 0.5; }
+  .gray .th { fill: #444441; }
+  .purple rect, .purple polygon { fill: #EEEDFE; stroke: #534AB7; stroke-width: 0.5; }
+  .purple .th { fill: #3C3489; }
+  .purple .ts { fill: #3C3489; }
+  .teal rect { fill: #E1F5EE; stroke: #0F6E56; stroke-width: 0.5; }
+  .teal .th { fill: #085041; }
+  .teal .ts { fill: #0F6E56; }
+  .tool rect { stroke-dasharray: 4 3; }
+  .arr { stroke: #5F5E5A; stroke-width: 1; fill: none; }
+  .divider { stroke: #888780; stroke-width: 0.5; stroke-dasharray: 6 4; }
+</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#5F5E5A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<rect x="0" y="0" width="680" height="1165" fill="#FFFFFF"/>
+<rect class="lane" x="40" y="30" width="150" height="1100" rx="4"/>
+<rect class="lane" x="190" y="30" width="150" height="1100" rx="4"/>
+<rect class="lane" x="340" y="30" width="150" height="1100" rx="4"/>
+<rect class="lane" x="490" y="30" width="150" height="1100" rx="4"/>
+<text class="th" x="115" y="50" text-anchor="middle" dominant-baseline="central">You</text>
+<text class="ts" x="115" y="68" text-anchor="middle" dominant-baseline="central">Owner, the gate</text>
+<text class="th" x="265" y="50" text-anchor="middle" dominant-baseline="central">Spec-architect</text>
+<text class="ts" x="265" y="68" text-anchor="middle" dominant-baseline="central">Main session</text>
+<text class="th" x="415" y="50" text-anchor="middle" dominant-baseline="central">Review agents</text>
+<text class="ts" x="415" y="68" text-anchor="middle" dominant-baseline="central">Five, read-only</text>
+<text class="th" x="565" y="50" text-anchor="middle" dominant-baseline="central">Files</text>
+<text class="ts" x="565" y="68" text-anchor="middle" dominant-baseline="central">spec/, logs</text>
+<text class="ts" x="498" y="86" dominant-baseline="central">Spec phase</text>
+<g class="gray"><rect x="47" y="95" width="136" height="44" rx="8"/><text class="th" x="115" y="117" text-anchor="middle" dominant-baseline="central">Describe intent</text></g>
+<g class="purple"><rect x="197" y="95" width="136" height="44" rx="8"/><text class="th" x="265" y="117" text-anchor="middle" dominant-baseline="central">Check spec state</text></g>
+<line class="arr" x1="183" y1="117" x2="195" y2="117" marker-end="url(#arrow)"/>
+<line class="arr" x1="265" y1="139" x2="265" y2="158" marker-end="url(#arrow)"/>
+<g class="gray tool"><rect x="197" y="160" width="136" height="44" rx="8"/><text class="th" x="265" y="182" text-anchor="middle" dominant-baseline="central">spec_check.py</text></g>
+<line class="arr" x1="265" y1="204" x2="265" y2="223" marker-end="url(#arrow)"/>
+<g class="purple"><rect x="197" y="225" width="136" height="44" rx="8"/><text class="th" x="265" y="247" text-anchor="middle" dominant-baseline="central">Ask with options</text></g>
+<g class="gray"><rect x="47" y="225" width="136" height="44" rx="8"/><text class="th" x="115" y="247" text-anchor="middle" dominant-baseline="central">Decide</text></g>
+<line class="arr" x1="197" y1="247" x2="185" y2="247" marker-end="url(#arrow)"/>
+<g class="purple"><rect x="197" y="295" width="136" height="56" rx="8"/><text class="th" x="265" y="313" text-anchor="middle" dominant-baseline="central">Update spec</text><text class="ts" x="265" y="333" text-anchor="middle" dominant-baseline="central">Show you the diff</text></g>
+<path d="M115 269 L115 323 L195 323" class="arr" marker-end="url(#arrow)"/>
+<g class="gray"><rect x="497" y="301" width="136" height="44" rx="8"/><text class="th" x="565" y="323" text-anchor="middle" dominant-baseline="central">spec/ files</text></g>
+<line class="arr" x1="333" y1="323" x2="495" y2="323" marker-end="url(#arrow)"/>
+<line class="arr" x1="265" y1="351" x2="265" y2="368" marker-end="url(#arrow)"/>
+<g class="purple"><polygon points="265,370 329,398 265,426 201,398"/><text class="ts" x="265" y="391" text-anchor="middle" dominant-baseline="central">Checklist</text><text class="ts" x="265" y="406" text-anchor="middle" dominant-baseline="central">complete?</text></g>
+<text class="ts" x="346" y="398" dominant-baseline="central">↻ No: ask again</text>
+<line class="arr" x1="265" y1="426" x2="265" y2="453" marker-end="url(#arrow)"/>
+<text class="ts" x="272" y="440" dominant-baseline="central">Yes</text>
+<g class="purple"><rect x="197" y="455" width="136" height="44" rx="8"/><text class="th" x="265" y="477" text-anchor="middle" dominant-baseline="central">Request review</text></g>
+<g class="gray tool"><rect x="47" y="455" width="136" height="56" rx="8"/><text class="th" x="115" y="473" text-anchor="middle" dominant-baseline="central">set_phase review</text><text class="ts" x="115" y="493" text-anchor="middle" dominant-baseline="central">Your gate</text></g>
+<line class="arr" x1="197" y1="477" x2="185" y2="477" marker-end="url(#arrow)"/>
+<g class="gray"><rect x="497" y="518" width="136" height="44" rx="8"/><text class="th" x="565" y="540" text-anchor="middle" dominant-baseline="central">PHASE file</text></g>
+<path d="M115 511 L115 540 L495 540" class="arr" marker-end="url(#arrow)"/>
+<line class="divider" x1="40" y1="595" x2="640" y2="595"/>
+<text class="ts" x="498" y="611" dominant-baseline="central">Review phase</text>
+<path d="M115 540 L115 647 L195 647" class="arr" marker-end="url(#arrow)"/>
+<g class="purple"><rect x="197" y="625" width="136" height="44" rx="8"/><text class="th" x="265" y="647" text-anchor="middle" dominant-baseline="central">Start review</text></g>
+<g class="teal"><rect x="347" y="619" width="136" height="56" rx="8"/><text class="th" x="415" y="637" text-anchor="middle" dominant-baseline="central">Review the spec</text><text class="ts" x="415" y="657" text-anchor="middle" dominant-baseline="central">Return questions</text></g>
+<line class="arr" x1="333" y1="647" x2="345" y2="647" marker-end="url(#arrow)"/>
+<line class="arr" x1="415" y1="675" x2="415" y2="688" marker-end="url(#arrow)"/>
+<g class="gray tool"><rect x="347" y="690" width="136" height="56" rx="8"/><text class="th" x="415" y="708" text-anchor="middle" dominant-baseline="central">spec_check.py</text><text class="ts" x="415" y="728" text-anchor="middle" dominant-baseline="central">Reviewer's check</text></g>
+<path d="M415 746 L415 755 L265 755 L265 763" class="arr" marker-end="url(#arrow)"/>
+<g class="purple"><rect x="197" y="765" width="136" height="44" rx="8"/><text class="th" x="265" y="787" text-anchor="middle" dominant-baseline="central">Merge and rank</text></g>
+<g class="gray"><rect x="497" y="765" width="136" height="44" rx="8"/><text class="th" x="565" y="787" text-anchor="middle" dominant-baseline="central">readiness log</text></g>
+<line class="arr" x1="333" y1="787" x2="495" y2="787" marker-end="url(#arrow)"/>
+<g class="gray"><rect x="47" y="765" width="136" height="44" rx="8"/><text class="th" x="115" y="787" text-anchor="middle" dominant-baseline="central">Answer questions</text></g>
+<line class="arr" x1="197" y1="787" x2="185" y2="787" marker-end="url(#arrow)"/>
+<g class="purple"><rect x="197" y="840" width="136" height="56" rx="8"/><text class="th" x="265" y="858" text-anchor="middle" dominant-baseline="central">Update spec</text><text class="ts" x="265" y="878" text-anchor="middle" dominant-baseline="central">Show you the diff</text></g>
+<path d="M115 809 L115 868 L195 868" class="arr" marker-end="url(#arrow)"/>
+<g class="gray"><rect x="497" y="846" width="136" height="44" rx="8"/><text class="th" x="565" y="868" text-anchor="middle" dominant-baseline="central">spec/ files</text></g>
+<line class="arr" x1="333" y1="868" x2="495" y2="868" marker-end="url(#arrow)"/>
+<line class="arr" x1="265" y1="896" x2="265" y2="918" marker-end="url(#arrow)"/>
+<g class="purple"><polygon points="265,920 329,948 265,976 201,948"/><text class="ts" x="265" y="940" text-anchor="middle" dominant-baseline="central">Blockers or</text><text class="ts" x="265" y="956" text-anchor="middle" dominant-baseline="central">majors open?</text></g>
+<text class="ts" x="346" y="948" dominant-baseline="central">↻ Yes: review again</text>
+<line class="arr" x1="265" y1="976" x2="265" y2="1003" marker-end="url(#arrow)"/>
+<text class="ts" x="272" y="990" dominant-baseline="central">No</text>
+<g class="purple"><rect x="197" y="1005" width="136" height="44" rx="8"/><text class="th" x="265" y="1027" text-anchor="middle" dominant-baseline="central">Request freeze</text></g>
+<g class="gray tool"><rect x="47" y="1005" width="136" height="56" rx="8"/><text class="th" x="115" y="1023" text-anchor="middle" dominant-baseline="central">set_phase build</text><text class="ts" x="115" y="1043" text-anchor="middle" dominant-baseline="central">Your gate, tagged</text></g>
+<line class="arr" x1="197" y1="1027" x2="185" y2="1027" marker-end="url(#arrow)"/>
+<g class="gray"><rect x="497" y="1068" width="136" height="44" rx="8"/><text class="th" x="565" y="1090" text-anchor="middle" dominant-baseline="central">PHASE file, tag</text></g>
+<path d="M115 1061 L115 1090 L495 1090" class="arr" marker-end="url(#arrow)"/>
+<rect x="47" y="1143" width="24" height="12" rx="3" fill="none" stroke="#5F5E5A" stroke-width="0.5" stroke-dasharray="4 3"/>
+<text class="ts" x="80" y="1149" dominant-baseline="central">Dashed box: a tool run, in the lane of whoever runs it</text>
+</svg>
