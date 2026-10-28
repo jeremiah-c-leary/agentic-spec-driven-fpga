@@ -93,9 +93,16 @@ every failure as an RTL bug, a test bug or a spec gap.
 release package and its hand-off checklist will be planned in detail in the
 M2 section.
 
-Agents never talk to each other directly. Every interaction is a
-conversation with the owner, a delegation from a main session, a file one
-agent writes and another reads, or a tool run.
+**How agents communicate.** In this project the agents run as *subagents*,
+which never message each other directly. Information flows through a main
+session (the spec-architect or the build-orchestrator), which delegates tasks
+and receives each agent's report, or through files one agent writes and
+another reads. This is deliberate. A failing test is a disagreement between
+the design and the test, so it goes first to the reviewer for triage; only a
+confirmed RTL bug reaches the rtl-designer, described as behaviour. Direct
+messaging between agents (Claude Code's experimental *agent teams*) is not
+used in the build phase, because it would let design and verification
+converge on a shared answer instead of checking each other.
 
 ## 5. Phases and gates
 
@@ -470,3 +477,4 @@ Recorded for every milestone, in `docs/evidence/mN/`:
 | O-7 | Final change classes and merge policy (7.4) | M0 |
 | O-8 | Who approves warning waivers, and how (ELFWS is the mechanism) | M2 |
 | O-9 | Development board selection (trade study) | M2 |
+| O-10 | Try agent teams (direct messaging) for the readiness review, as a later experiment? | After M1 |
