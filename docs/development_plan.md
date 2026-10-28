@@ -422,27 +422,22 @@ in this plan. Topics the spec-architect must cover with the owner include:
 - whether a UART-to-register bridge is included now, as the base for the
   observability later milestones need (counters, status).
 
-**Inputs:** the owner's answers in the interview. The PTP Delay_Req filter
-spec currently in `spec/` is **not** an input; it was an experiment to judge
-the quality of the agents' VHDL, and is moved out of `spec/` before M1
-starts (O-11).
+**Inputs:** the owner's answers in the interview.
 
 **Steps**
 
 1. Create the change branch `cr/001-m1-build-id-uart`.
-2. Clear `spec/` of the PTP design as decided in O-11, keeping the
-   design-independent files (style guide, checklist).
-3. **Spec phase** with the spec-architect: interview, artifacts, checklist.
-4. **Review phase:** readiness review until no blockers or majors remain.
-5. **Freeze:** the owner runs `set_phase build` (`spec-frozen-1`).
-6. **Build phase** with the build-orchestrator (section 6), pushing to Forgejo
+2. **Spec phase** with the spec-architect: interview, artifacts, checklist.
+3. **Review phase:** readiness review until no blockers or majors remain.
+4. **Freeze:** the owner runs `set_phase build` (`spec-frozen-1`).
+5. **Build phase** with the build-orchestrator (section 6), pushing to Forgejo
    so CI runs on every change.
-7. **Pull request** on Forgejo with CI green and the reviewer's verdict.
-8. **Owner's code review** of the generated VHDL, recorded as an assessment
+6. **Pull request** on Forgejo with CI green and the reviewer's verdict.
+7. **Owner's code review** of the generated VHDL, recorded as an assessment
    in the evidence folder: quality, style, anything a human designer would
    have done differently.
-9. **Merge** by the owner (fast-forward), tag `m1-complete`, publish to GitHub.
-10. **Retrospective**, and plan M2 in this document.
+8. **Merge** by the owner (fast-forward), tag `m1-complete`, publish to GitHub.
+9. **Retrospective**, and plan M2 in this document.
 
 **Exit criteria (fixed before the run)**
 
@@ -502,4 +497,3 @@ Recorded for every milestone, in `docs/evidence/mN/`:
 | O-8 | Who approves warning waivers, and how (ELFWS is the mechanism) | M2 |
 | O-9 | Development board selection (trade study) | M2 |
 | O-10 | Try agent teams (direct messaging) for the readiness review, as a later experiment? | After M1 |
-| O-11 | What happens to the PTP filter spec in `spec/`: move to an `examples/` directory as a reference, or remove it (it remains in git history)? | M1 |
