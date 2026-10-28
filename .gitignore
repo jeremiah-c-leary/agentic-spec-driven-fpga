@@ -243,3 +243,6 @@ usage_statistics_webtalk.*
 *.sim/
 *.gen/
 *.ip_user_files/
+
+#VIM files
+*.swp
