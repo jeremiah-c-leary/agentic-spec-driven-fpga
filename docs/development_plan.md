@@ -292,6 +292,8 @@ produced it.
 | Git, GitHub CLI | Version control; owner's publishing | Owner | WSL | M0 | record in M0 |
 | Forgejo, Forgejo runner | Local git server and CI | CI | WSL | M0 | record in M0 |
 | Mermaid (+ CLI) | Diagrams in Markdown; export for slides | Architect, docs | WSL | M0 | record in M0 |
+| WaveDrom (+ CLI) | Timing diagrams and register bit-field maps; rendered to SVG | Architect, docs | WSL | M0 | record in M0 |
+| PlantUML (needs Java) | Text diagrams, including swimlane process maps; rendered to SVG | Architect, docs | WSL | M0 | record in M0 |
 | Vivado (free edition) | Synthesis, implementation, bitstream | Physical-engineer | WSL | M2 | - |
 | Vivado hardware server | Programming over JTAG | Integration-engineer | Windows | M2 | - |
 | ELFWS | Warning suppression with justifications; gate on new warnings | Physical-engineer | WSL | M2 | - |
@@ -330,11 +332,25 @@ isolation rather than guardrails) is a later hardening option.
 
 ## 11. Diagrams
 
-- **Mermaid by default:** block diagrams, flowcharts, state machines,
-  sequences. Text, versioned, diffable, rendered by GitHub and Forgejo, and
-  editable by agents.
-- **SVG where the layout itself carries meaning,** such as process maps, kept
-  in `docs/img/` next to the document that uses it.
+| Tool | Use for | Source |
+|---|---|---|
+| **Mermaid** (default) | Block diagrams, flowcharts, state machines, sequences | Inside the Markdown document |
+| **WaveDrom** | Timing diagrams (e.g. UART framing) and register bit-field maps in the spec | `.json` file next to its SVG |
+| **PlantUML** | Diagrams Mermaid lays out poorly, especially swimlane process maps | `.puml` file next to its SVG |
+| **Hand-drawn SVG** | Only where exact layout carries meaning and no text tool can express it | The SVG itself |
+
+- **Text first.** Diagram sources are text so they are versioned, diffable
+  and editable by agents. WaveDrom matters most here: timing and register
+  diagrams in `spec/` are part of the specification the agents read, not
+  just illustrations.
+- **Rendering.** GitHub and Forgejo display Mermaid directly. WaveDrom and
+  PlantUML sources are rendered to SVG by a script; the source and its SVG are
+  committed together, with the same base name. CI re-renders every diagram
+  and fails if a committed SVG is out of date.
+- **Location.** Diagrams live next to the document that uses them:
+  `spec/` diagrams in `spec/`, plan and other document diagrams in `docs/img/`.
+- The spec and review process map (section 5.1) is currently hand-drawn SVG;
+  it may later be converted to PlantUML.
 
 ## 12. Milestones
 
