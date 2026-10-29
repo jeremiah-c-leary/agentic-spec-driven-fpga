@@ -27,7 +27,7 @@ TOOLS=(
   "Forgejo runner|yes|forgejo-runner --version"
   "Node.js|yes|node --version"
   "Mermaid CLI|yes|mmdc --version"
-  "WaveDrom CLI|yes|wavedrom-cli --version"
+  "WaveDrom|yes|wavedrom_check"
   "Java|yes|java -version"
   "PlantUML|yes|plantuml -version"
   "Vivado|no|vivado -version"
@@ -37,6 +37,14 @@ TOOLS=(
 python_check() {
   command -v python3 >/dev/null 2>&1 || { echo "NOT INSTALLED"; return; }
   python3 -c 'import sys; v=sys.version.split()[0]; print(v if sys.version_info >= (3, 11) else v + " - MISSING: need 3.11 or later")'
+}
+
+# WaveDromPy: PyPI package "wavedrom", command "wavedrompy". The version
+# comes from the package metadata, since the command has no version option.
+wavedrom_check() {
+  command -v wavedrompy >/dev/null 2>&1 || { echo "NOT INSTALLED"; return; }
+  python3 -c 'import importlib.metadata as m; print("WaveDromPy " + m.version("wavedrom"))' 2>/dev/null \
+    || echo "wavedrompy present (version unknown)"
 }
 
 # Yosys can be installed without the GHDL plugin, which the gates need.

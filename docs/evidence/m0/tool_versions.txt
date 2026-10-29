@@ -1,5 +1,5 @@
 # Tool versions
-# Date:   2026-10-28 21:14:58 CDT
+# Date:   2026-10-28 21:24:04 CDT
 # Host:   DESKTOP-HV9NHA3
 # Kernel: Linux 6.18.54.1-microsoft-standard-WSL2
 #
@@ -13,10 +13,10 @@ Yosys GHDL plugin  yes       MISSING
 Git                yes       git version 2.25.1
 GitHub CLI         yes       gh version 2.45.0 (2024-03-04)
 Forgejo            yes       Forgejo version 9.0.1+gitea-1.22.0 (release name 9.0.1) built with GNU Make 4.4.1, go1.23.2 : bindata, timetzdata, sqlite, sqlite_unlock_notify
-Forgejo runner     yes       NOT INSTALLED
+Forgejo runner     yes       /usr/local/bin/forgejo-runner: line 1: Not: command not found
 Node.js            yes       v22.23.2
 Mermaid CLI        yes       12.0.0
-WaveDrom CLI       yes       NOT INSTALLED
+WaveDrom           yes       wavedrompy present (version unknown)
 Java               yes       openjdk version "14.0.2" 2020-07-14
 PlantUML           yes       PlantUML version 1.2026.9 / 18d0aae [2026-10-17 08:25:10 UTC]
 Vivado             no        NOT INSTALLED

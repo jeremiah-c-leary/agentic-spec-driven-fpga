@@ -292,7 +292,7 @@ produced it.
 | Git, GitHub CLI | Version control; owner's publishing | Owner | WSL | M0 | 2.25.1 / 2.45.0 |
 | Forgejo, Forgejo runner | Local git server and CI | CI | WSL | M0 | 9.0.1 / runner not installed |
 | Mermaid (+ CLI) | Diagrams in Markdown; export for slides | Architect, docs | WSL | M0 | 12.0.0 |
-| WaveDrom (+ CLI) | Timing diagrams and register bit-field maps; rendered to SVG | Architect, docs | WSL | M0 | not installed |
+| WaveDrom (WaveDromPy, Python) | Timing diagrams and register bit-field maps; rendered to SVG with `wavedrompy` | Architect, docs | WSL | M0 | not installed |
 | PlantUML (needs Java) | Text diagrams, including swimlane process maps; rendered to SVG | Architect, docs | WSL | M0 | 1.2026.9 (Java 14.0.2) |
 | Vivado (free edition) | Synthesis, implementation, bitstream | Physical-engineer | WSL | M2 | - |
 | Vivado hardware server | Programming over JTAG | Integration-engineer | Windows | M2 | - |
