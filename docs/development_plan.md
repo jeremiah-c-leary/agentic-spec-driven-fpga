@@ -284,16 +284,16 @@ produced it.
 
 | Tool | Purpose | Used by | Runs in | From | Version |
 |---|---|---|---|---|---|
-| Claude Code | Runs the agents | All agents | WSL | M0 | record in M0 |
-| Python 3.11+ | Spec check, layout check, hooks | Gates, hooks | WSL | M0 | record in M0 |
-| GHDL | VHDL-2008 compile and simulation | Gates | WSL | M0 | record in M0 |
-| VSG 3.35 | Style check, `jcl` style | Gates | WSL | M0 | record in M0 |
-| Yosys + GHDL plugin | Resource estimate, latch check | Gates | WSL | M0 | record in M0 |
-| Git, GitHub CLI | Version control; owner's publishing | Owner | WSL | M0 | record in M0 |
-| Forgejo, Forgejo runner | Local git server and CI | CI | WSL | M0 | record in M0 |
-| Mermaid (+ CLI) | Diagrams in Markdown; export for slides | Architect, docs | WSL | M0 | record in M0 |
-| WaveDrom (+ CLI) | Timing diagrams and register bit-field maps; rendered to SVG | Architect, docs | WSL | M0 | record in M0 |
-| PlantUML (needs Java) | Text diagrams, including swimlane process maps; rendered to SVG | Architect, docs | WSL | M0 | record in M0 |
+| Claude Code | Runs the agents | All agents | WSL | M0 | 2.1.312 |
+| Python 3.11+ | Spec check, layout check, hooks | Gates, hooks | WSL | M0 | 3.11.6 |
+| GHDL | VHDL-2008 compile and simulation | Gates | WSL | M0 | 7.0.0-dev (6.0.0.r554, local build) |
+| VSG 3.35 | Style check, `jcl` style | Gates | WSL | M0 | 3.35.0 |
+| Yosys + GHDL plugin | Resource estimate, latch check | Gates | WSL | M0 | 0.70+255; plugin **missing** |
+| Git, GitHub CLI | Version control; owner's publishing | Owner | WSL | M0 | 2.25.1 / 2.45.0 |
+| Forgejo, Forgejo runner | Local git server and CI | CI | WSL | M0 | 9.0.1 / runner not installed |
+| Mermaid (+ CLI) | Diagrams in Markdown; export for slides | Architect, docs | WSL | M0 | 12.0.0 |
+| WaveDrom (+ CLI) | Timing diagrams and register bit-field maps; rendered to SVG | Architect, docs | WSL | M0 | not installed |
+| PlantUML (needs Java) | Text diagrams, including swimlane process maps; rendered to SVG | Architect, docs | WSL | M0 | 1.2026.9 (Java 14.0.2) |
 | Vivado (free edition) | Synthesis, implementation, bitstream | Physical-engineer | WSL | M2 | - |
 | Vivado hardware server | Programming over JTAG | Integration-engineer | Windows | M2 | - |
 | ELFWS | Warning suppression with justifications; gate on new warnings | Physical-engineer | WSL | M2 | - |
@@ -301,12 +301,10 @@ produced it.
 | Python + Npcap | Lab watcher, raw Ethernet tests | Lab | Windows | M2/M3 | - |
 | GitHub Releases | Milestone release packages | Owner | GitHub | M2 | - |
 
-To record versions in M0:
-
-```bash
-claude --version; python3 --version; ghdl --version | head -1
-vsg --version; yosys -V; git --version; gh --version | head -1
-```
+To record versions, run `tools/tool_versions.sh`; it lists every tool, marks
+the required ones, and exits with an error if any required tool is missing.
+The versions above are from `docs/evidence/m0/tool_versions.txt`
+(2026-10-28).
 
 **Artifact storage.** Releases (from M2) are kept in a local `releases/`
 directory and published per milestone as GitHub Releases. The release
