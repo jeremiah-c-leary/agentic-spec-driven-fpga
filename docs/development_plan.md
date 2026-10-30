@@ -165,8 +165,8 @@ M1 has no hardware stages. The build phase is:
 
 1. The orchestrator delegates to the rtl-designer and the
    verification-engineer **in parallel**, both working from the frozen spec.
-2. The orchestrator runs the gates: layout, compile, VSG `jcl` style, Yosys
-   resource estimate (no latches), and simulation tests.
+2. The orchestrator runs the gates: layout, compile, VSG `jcl` style, GHDL
+   synthesis check (synthesizable, no inferred latches), and simulation tests.
 3. The orchestrator asks the reviewer for a build review and triage.
 4. Findings are routed:
    - RTL bug, or architecture/layout/style must-fix: to the rtl-designer;
@@ -286,9 +286,8 @@ produced it.
 |---|---|---|---|---|---|
 | Claude Code | Runs the agents | All agents | WSL | M0 | 2.1.312 |
 | Python 3.11+ | Spec check, layout check, hooks | Gates, hooks | WSL | M0 | 3.11.6 |
-| GHDL | VHDL-2008 compile and simulation | Gates | WSL | M0 | 7.0.0-dev (6.0.0.r554, local build) |
+| GHDL | VHDL-2008 compile, simulation, and synthesis check (no latches) | Gates | WSL | M0 | 7.0.0-dev (6.0.0.r554, local build) |
 | VSG 3.35 | Style check, `jcl` style | Gates | WSL | M0 | 3.35.0 |
-| Yosys + GHDL plugin | Resource estimate, latch check | Gates | WSL | M0 | 0.70+255; plugin **missing** |
 | Git, GitHub CLI | Version control; owner's publishing | Owner | WSL | M0 | 2.25.1 / 2.45.0 |
 | Forgejo, Forgejo runner | Local git server and CI | CI | WSL | M0 | 9.0.1 / runner not installed |
 | Mermaid (+ CLI) | Diagrams in Markdown; export for slides | Architect, docs | WSL | M0 | 12.0.0 |
@@ -305,6 +304,12 @@ To record versions, run `tools/tool_versions.sh`; it lists every tool, marks
 the required ones, and exits with an error if any required tool is missing.
 The versions above are from `docs/evidence/m0/tool_versions.txt`
 (2026-10-28).
+
+**Yosys is not used** (decided 2026-10-30). GHDL's own synthesis covers the
+synthesizability and latch checks; resource estimates are not useful in this
+flow, and real utilization comes from Vivado in M2. Removing Yosys also
+removes its GHDL plugin, which proved fragile to install. Formal
+verification (e.g. SymbiYosys) would bring both back; see O-11.
 
 **Artifact storage.** Releases (from M2) are kept in a local `releases/`
 directory and published per milestone as GitHub Releases. The release
@@ -482,7 +487,7 @@ Recorded for every milestone, in `docs/evidence/mN/`:
 - **Time:** elapsed time per phase, and owner time spent.
 - **Iterations:** build-phase loops, and what each fixed.
 - **Gate results:** the CI history for the change.
-- **Resources:** LUT and flip-flop estimates.
+- **Resources:** Vivado utilization (from M2).
 - **Tool versions** for every result.
 
 ## 14. Risks (M0 and M1)
@@ -511,3 +516,4 @@ Recorded for every milestone, in `docs/evidence/mN/`:
 | O-8 | Who approves warning waivers, and how (ELFWS is the mechanism) | M2 |
 | O-9 | Development board selection (trade study) | M2 |
 | O-10 | Try agent teams (direct messaging) for the readiness review, as a later experiment? | After M1 |
+| O-11 | Add formal verification (e.g. SymbiYosys) for protocol and clock-domain-crossing logic? It would bring back Yosys and its GHDL plugin. | Later |
