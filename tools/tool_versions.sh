@@ -19,8 +19,6 @@ TOOLS=(
   "Python|yes|python_check"
   "GHDL|yes|ghdl --version"
   "VSG|yes|vsg --version"
-  "Yosys|yes|yosys -V"
-  "Yosys GHDL plugin|yes|ghdl_plugin_check"
   "Git|yes|git --version"
   "GitHub CLI|yes|gh --version"
   "Forgejo|yes|forgejo --version"
@@ -45,16 +43,6 @@ wavedrom_check() {
   command -v wavedrompy >/dev/null 2>&1 || { echo "NOT INSTALLED"; return; }
   python3 -c 'import importlib.metadata as m; print("WaveDromPy " + m.version("wavedrom"))' 2>/dev/null \
     || echo "wavedrompy present (version unknown)"
-}
-
-# Yosys can be installed without the GHDL plugin, which the gates need.
-ghdl_plugin_check() {
-  command -v yosys >/dev/null 2>&1 || { echo "NOT INSTALLED (no yosys)"; return; }
-  if yosys -q -m ghdl -p 'help ghdl' >/dev/null 2>&1; then
-    echo "present"
-  else
-    echo "MISSING"
-  fi
 }
 
 report() {
