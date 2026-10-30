@@ -10,7 +10,9 @@
 #
 # To add a tool, add a line to TOOLS below:  "label|required|command"
 #   required  yes = must be installed now; no = optional or a later milestone
-#   command   the command that prints the version; its first line is reported
+#   command   the command that prints the version; its first line is reported.
+#             It must exit with status 0 when the tool works: a tool whose
+#             version command fails is reported as not available.
 # ==============================================================================
 set -u
 
@@ -33,17 +35,26 @@ TOOLS=(
 
 # Python must be 3.11 or later (the tools use the built-in TOML reader).
 python_check() {
-  command -v python3 >/dev/null 2>&1 || { echo "NOT INSTALLED"; return; }
-  python3 -c 'import sys; v=sys.version.split()[0]; print(v if sys.version_info >= (3, 11) else v + " - MISSING: need 3.11 or later")'
+  command -v python3 >/dev/null 2>&1 || { echo "NOT INSTALLED"; return 1; }
+  python3 -c 'import sys; v=sys.version.split()[0]; ok=sys.version_info >= (3, 11); print(v if ok else v + " - MISSING: need 3.11 or later"); sys.exit(0 if ok else 1)'
 }
 
 # WaveDromPy: PyPI package "wavedrom", command "wavedrompy". The version
-# comes from the package metadata, since the command has no version option.
+# comes from the package metadata, read with the Python interpreter that
+# wavedrompy itself runs with (it may be a pipx or virtual environment).
 wavedrom_check() {
-  command -v wavedrompy >/dev/null 2>&1 || { echo "NOT INSTALLED"; return; }
-  python3 -c 'import importlib.metadata as m; print("WaveDromPy " + m.version("wavedrom"))' 2>/dev/null \
+  local exe line py
+  exe=$(command -v wavedrompy) || { echo "NOT INSTALLED"; return 1; }
+  line=$(head -n 1 "$exe")
+  line=${line#\#!}
+  set -- $line
+  if [ "$(basename "${1:-}")" = "env" ]; then py=${2:-python3}; else py=${1:-python3}; fi
+  command -v "$py" >/dev/null 2>&1 || py=python3
+  "$py" -c 'import importlib.metadata as m; print("WaveDromPy " + m.version("wavedrom"))' 2>/dev/null \
     || echo "wavedrompy present (version unknown)"
 }
+
+MISSING_REQUIRED=()
 
 report() {
   echo "# Tool versions"
@@ -51,24 +62,42 @@ report() {
   echo "# Host:   $(hostname)"
   echo "# Kernel: $(uname -sr)"
   echo "#"
-  printf '%-18s %-9s %s\n' "# Tool" "Required" "Version"
+  printf '%-18s %-9s %-10s %s\n' "# Tool" "Required" "Available" "Version"
   for entry in "${TOOLS[@]}"; do
     IFS='|' read -r label required cmd <<< "$entry"
     exe=${cmd%% *}
     if command -v "$exe" >/dev/null 2>&1; then
       # The commands come only from the TOOLS list in this file.
-      version=$(eval "$cmd" 2>&1 | head -n 1)
+      output=$(eval "$cmd" 2>&1)
+      status=$?
+      version=$(printf '%s\n' "$output" | head -n 1)
       [ -z "$version" ] && version="(no version output)"
     else
       version="NOT INSTALLED"
+      status=127
     fi
-    printf '%-18s %-9s %s\n' "$label" "$required" "$version"
+    # Available = found AND its version command succeeded. A broken file,
+    # missing library or crash makes the command fail, so the tool is not
+    # available; the first line of its output is shown as the reason.
+    if [ "$status" -ne 0 ]; then
+      available="no"
+    else
+      case "$version" in
+        *"NOT INSTALLED"*|*MISSING*) available="no" ;;
+        *)                           available="yes" ;;
+      esac
+    fi
+    [ "$available" = "no" ] && [ "$version" = "NOT INSTALLED" ] && version="-"
+    if [ "$available" = "no" ] && [ "$required" = "yes" ]; then
+      MISSING_REQUIRED+=("$label")
+    fi
+    printf '%-18s %-9s %-10s %s\n' "$label" "$required" "$available" "$version"
   done
 }
 
 tmp=$(mktemp)
 trap 'rm -f "$tmp"' EXIT
-report > "$tmp"
+report > "$tmp"     # runs in this shell, so MISSING_REQUIRED is kept
 
 if [ $# -ge 1 ]; then
   mkdir -p "$(dirname "$1")"
@@ -76,13 +105,10 @@ if [ $# -ge 1 ]; then
 fi
 cat "$tmp"
 
-# Required tools that are missing: required = yes and NOT INSTALLED / MISSING.
-missing=$(awk '!/^#/ && $0 ~ /(NOT INSTALLED|MISSING)/ {
-                 if (substr($0, 20, 3) == "yes") print }' "$tmp")
-if [ -n "$missing" ]; then
+if [ ${#MISSING_REQUIRED[@]} -gt 0 ]; then
   echo
   echo "Missing required tools:"
-  echo "$missing" | awk '{ print "  - " substr($0, 1, 18) }'
+  printf '  - %s\n' "${MISSING_REQUIRED[@]}"
   exit 1
 fi
 exit 0
