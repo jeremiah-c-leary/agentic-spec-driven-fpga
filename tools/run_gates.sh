@@ -3,7 +3,8 @@
 # run_gates.sh - deterministic pass/fail gates. Agents run this; they never
 # decide pass/fail themselves.
 #
-#   ./tools/run_gates.sh rtl     layout, compile + elaborate RTL, VSG jcl, synthesis
+#   ./tools/run_gates.sh rtl     layout, compile + elaborate RTL, VSG jcl,
+#                                GHDL synthesis (no latches)
 #   ./tools/run_gates.sh tests   compile RTL + testbenches, run all tests
 #   ./tools/run_gates.sh all     everything (default)
 #
@@ -81,24 +82,14 @@ if [ "$MODE" = "rtl" ] || [ "$MODE" = "all" ]; then
       gate "vsg-jcl" FAIL "vsg not installed (pip install vsg)"
     fi
 
-    # Synthesis (Yosys + GHDL plugin; resource estimate, latch check)
-    if command -v yosys >/dev/null 2>&1; then
-      if yosys -m ghdl -p "ghdl $STD ${PKG[*]} ${RTL[*]} -e $TOP; \
-           synth_xilinx -family xcup -flatten; tee -o $REP/synth_stat.txt stat" \
-           >"$REP/synth.log" 2>&1; then
-        LUTS=$(grep -E '^\s+LUT[1-6]\s' "$REP/synth_stat.txt" | awk '{s+=$2} END{print s+0}')
-        FFS=$(grep -E '^\s+FD[A-Z]+\s' "$REP/synth_stat.txt" | awk '{s+=$2} END{print s+0}')
-        LATCH=$(grep -cE '^\s+(LD[A-Z]+|\$_DLATCH)' "$REP/synth_stat.txt")
-        if [ "$LATCH" -gt 0 ]; then
-          gate "synthesis" FAIL "$LATCH latch cell types inferred, see $REP/synth_stat.txt"
-        else
-          gate "synthesis" PASS "~$LUTS LUTs, ~$FFS FFs, no latches (Yosys estimate)"
-        fi
-      else
-        gate "synthesis" FAIL "see $REP/synth.log"
-      fi
+    # Synthesis check (GHDL's own synthesis): the design must be synthesizable
+    # and must not infer latches. GHDL rejects latches unless --latches is given.
+    if ghdl --synth $STD --workdir="$WORK" "$TOP" >"$REP/synth.log" 2>&1; then
+      gate "synthesis" PASS "GHDL synthesis of $TOP, no latches"
+    elif grep -q "latch infered" "$REP/synth.log"; then
+      gate "synthesis" FAIL "$(grep -c 'latch infered' "$REP/synth.log") latch(es) inferred, see $REP/synth.log"
     else
-      gate "synthesis" SKIP "yosys not installed"
+      gate "synthesis" FAIL "not synthesizable, see $REP/synth.log"
     fi
   else
     gate "vsg-jcl" SKIP "compile failed"
