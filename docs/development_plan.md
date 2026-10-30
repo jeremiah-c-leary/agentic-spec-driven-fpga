@@ -285,15 +285,16 @@ produced it.
 | Tool | Purpose | Used by | Runs in | From | Version |
 |---|---|---|---|---|---|
 | Claude Code | Runs the agents | All agents | WSL | M0 | 2.1.312 |
-| Python 3.11+ | Spec check, layout check, hooks | Gates, hooks | WSL | M0 | 3.11.6 |
-| GHDL | VHDL-2008 compile, simulation, and synthesis check (no latches) | Gates | WSL | M0 | 7.0.0-dev (6.0.0.r554, local build) |
+| Python 3.11+ | Spec check, layout check, hooks | Gates, hooks | WSL | M0 | 3.14.4 |
+| GHDL | VHDL-2008 compile, simulation, and synthesis check (no latches) | Gates | WSL | M0 | 5.0.1 (Ubuntu package) |
 | VSG 3.35 | Style check, `jcl` style | Gates | WSL | M0 | 3.35.0 |
-| Git, GitHub CLI | Version control; owner's publishing | Owner | WSL | M0 | 2.25.1 / 2.45.0 |
-| Forgejo, Forgejo runner | Local git server and CI | CI | WSL | M0 | 9.0.1 / runner not installed |
-| Mermaid (+ CLI) | Diagrams in Markdown; export for slides | Architect, docs | WSL | M0 | 12.0.0 |
-| WaveDrom (WaveDromPy, Python) | Timing diagrams and register bit-field maps; rendered to SVG with `wavedrompy` | Architect, docs | WSL | M0 | not installed |
-| PlantUML (needs Java) | Text diagrams, including swimlane process maps; rendered to SVG | Architect, docs | WSL | M0 | 1.2026.9 (Java 14.0.2) |
-| Vivado (free edition) | Synthesis, implementation, bitstream | Physical-engineer | WSL | M2 | - |
+| Git, GitHub CLI | Version control; owner's publishing | Owner | WSL | M0 | 2.53.0 / 2.46.0 |
+| Forgejo, Forgejo runner | Local git server and CI | CI | WSL | M0 | 17.0.1 / v13.1.0 |
+| Node.js | Runs the Mermaid CLI; CI checkout actions | CI, docs | WSL | M0 | v22.23.2 |
+| Mermaid (+ CLI) | Diagrams in Markdown; export for slides | Architect, docs | WSL | M0 | 11.12.0 |
+| WaveDrom (WaveDromPy, Python) | Timing diagrams and register bit-field maps; rendered to SVG with `wavedrompy` | Architect, docs | WSL | M0 | WaveDromPy 2.0.3.post3 |
+| PlantUML (needs Java) | Text diagrams, including swimlane process maps; rendered to SVG | Architect, docs | WSL | M0 | 1.2026.9 (Java 25.0.4.1) |
+| Vivado (free edition) | Synthesis, implementation, bitstream | Physical-engineer | WSL | M2 | 2026.1 (installed early) |
 | Vivado hardware server | Programming over JTAG | Integration-engineer | Windows | M2 | - |
 | ELFWS | Warning suppression with justifications; gate on new warnings | Physical-engineer | WSL | M2 | - |
 | stacv | External interface constraints and validation | Physical-engineer | WSL | M2 | - |
@@ -303,7 +304,7 @@ produced it.
 To record versions, run `tools/tool_versions.sh`; it lists every tool, marks
 the required ones, and exits with an error if any required tool is missing.
 The versions above are from `docs/evidence/m0/tool_versions.txt`
-(2026-10-28).
+(2026-10-30), on Ubuntu 26.04 in WSL2, on a dedicated NVMe drive.
 
 **Yosys is not used** (decided 2026-10-30). GHDL's own synthesis covers the
 synthesizability and latch checks; resource estimates are not useful in this

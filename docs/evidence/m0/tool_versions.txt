@@ -1,22 +1,20 @@
 # Tool versions
-# Date:   2026-10-28 21:24:04 CDT
+# Date:   2026-10-30 07:09:57 CDT
 # Host:   DESKTOP-HV9NHA3
 # Kernel: Linux 6.18.54.1-microsoft-standard-WSL2
 #
-# Tool             Required  Version
-Claude Code        yes       2.1.312 (Claude Code)
-Python             yes       3.11.6
-GHDL               yes       GHDL 7.0.0-dev (6.0.0.r554.ga977191e7.dirty) [Dunoon edition]
-VSG                yes       VHDL Style Guide (VSG) version: 3.35.0
-Yosys              yes       Yosys 0.70+255 (git sha1 72b0054f0, Release, Clang /usr/bin/clang++ 21.1.8)
-Yosys GHDL plugin  yes       MISSING
-Git                yes       git version 2.25.1
-GitHub CLI         yes       gh version 2.45.0 (2024-03-04)
-Forgejo            yes       Forgejo version 9.0.1+gitea-1.22.0 (release name 9.0.1) built with GNU Make 4.4.1, go1.23.2 : bindata, timetzdata, sqlite, sqlite_unlock_notify
-Forgejo runner     yes       /usr/local/bin/forgejo-runner: line 1: Not: command not found
-Node.js            yes       v22.23.2
-Mermaid CLI        yes       12.0.0
-WaveDrom           yes       wavedrompy present (version unknown)
-Java               yes       openjdk version "14.0.2" 2020-07-14
-PlantUML           yes       PlantUML version 1.2026.9 / 18d0aae [2026-10-17 08:25:10 UTC]
-Vivado             no        NOT INSTALLED
+# Tool             Required  Available  Version
+Claude Code        yes       yes        2.1.312 (Claude Code)
+Python             yes       yes        3.14.4
+GHDL               yes       yes        GHDL 5.0.1 (Ubuntu 5.0.1+dfsg-1ubuntu1) [Dunoon edition]
+VSG                yes       yes        VHDL Style Guide (VSG) version: 3.35.0
+Git                yes       yes        git version 2.53.0
+GitHub CLI         yes       yes        gh version 2.46.0 (2025-12-13 Ubuntu 2.46.0-4)
+Forgejo            yes       yes        forgejo version 17.0.1+gitea-1.22.0 (release name 17.0.1) built with GNU Make 4.4.1, go1.26.10 : bindata, timetzdata, sqlite, sqlite_unlock_notify
+Forgejo runner     yes       yes        forgejo-runner version v13.1.0
+Node.js            yes       yes        v22.23.2
+Mermaid CLI        yes       yes        11.12.0
+WaveDrom           yes       yes        WaveDromPy 2.0.3.post3
+Java               yes       yes        openjdk version "25.0.4.1" 2026-08-18
+PlantUML           yes       yes        PlantUML version 1.2026.9 / 18d0aae [2026-10-17 08:25:10 UTC]
+Vivado             no        yes        vivado v2026.1 (64-bit)
