@@ -72,6 +72,25 @@ file, or a unit with a feature file but no tests.
 5. Start Claude Code in this folder once (`claude`) and accept the workspace
    trust prompt. Hooks in the agent files only run in a trusted folder.
 
+## Starting a session
+Two things are not started automatically. At the start of every session,
+from the root of the working copy:
+
+```bash
+cd ~/projects/agentic-spec-driven-fpga
+source .venv/bin/activate     # the project's Python tools (VSG, WaveDromPy, ...)
+forgejo-ctl start             # start the local Forgejo server
+forgejo-ctl status            # confirm it is running
+```
+
+- **Activate `.venv` before starting Claude Code.** The agents' commands
+  inherit the environment of the shell Claude Code was started from, so this
+  is how they get the same Python tools as you.
+- **`forgejo-ctl`** (`/usr/local/bin/forgejo-ctl`) has three commands:
+  `start`, `status` and `stop`. Forgejo is started by hand rather than on
+  every WSL session. Without it, pushes to `origin` and CI do not work.
+- At the end of a session, `forgejo-ctl stop` shuts Forgejo down (optional).
+
 ## Trying the specification phase
     claude --agent spec-architect
 
