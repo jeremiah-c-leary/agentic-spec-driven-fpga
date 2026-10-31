@@ -328,17 +328,20 @@ from the root of the working copy:
 ```bash
 cd ~/projects/agentic-spec-driven-fpga
 source .venv/bin/activate     # the project's Python tools (VSG, WaveDromPy, ...)
-forgejo-ctl start             # start the local Forgejo server
-forgejo-ctl status            # confirm it is running
+forgejo-ctl start             # start the local Forgejo server and its runner
+forgejo-ctl status            # confirm both are running and healthy
 ```
 
 - **Python environment.** The project's Python tools are installed in a
   virtual environment, `.venv`, at the root of the working copy (not
   committed). It must be activated **before** Claude Code is started, because
   the agents' commands inherit the environment of the shell that started it.
-- **Forgejo.** Started by hand rather than on every WSL session, with
-  `/usr/local/bin/forgejo-ctl`, which has three commands: `start`, `status`
-  and `stop`. Without Forgejo, pushes to `origin` and CI do not work.
+- **Forgejo and its runner.** Started by hand rather than on every WSL
+  session, with `forgejo-ctl`: `start`, `stop`, `restart`, `status` and
+  `logs [forgejo|runner]`. `status` checks that Forgejo answers over HTTP and
+  that the runner is running. Without them, pushes to `origin` and CI do not
+  work. The script's source is `tools/forgejo-ctl`, installed to
+  `/usr/local/bin` from there; the full setup is in `docs/setup/forgejo.md`.
 - **CI must not depend on the owner's session.** The runner runs as its own
   user and does not inherit the owner's shell, so CI workflows activate the
   project's Python environment themselves.
