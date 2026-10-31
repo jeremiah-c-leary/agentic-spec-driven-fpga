@@ -15,6 +15,9 @@ Phases change only through `tools/set_phase.sh`, which runs the spec check
 and records who approved. A hook stops agents writing `rtl/` or `tb/` before
 the build phase, so you can try the whole specification flow safely.
 
+How the project runs (roles, rules, milestones, tools, environment) is
+described in the development plan, `docs/development_plan.md`.
+
 ## Agents (.claude/agents/)
 | Agent | Role | Writes | Cannot access |
 |---|---|---|---|
@@ -40,11 +43,19 @@ spec/
 pkg/                       shared interface packages
 rtl/top  rtl/<subsystem>  rtl/common      (as declared in the layout)
 tb/top   tb/<subsystem>                   (as declared in the layout)
+docs/
+  development_plan.md      how the project runs; milestones M0, M1, ...
+  setup/                   how the local infrastructure is set up (Forgejo, runner)
+  evidence/                per-milestone evidence (tool versions, environment, ...)
+  img/                     diagrams used by the documents
 tools/
   spec_check.py            mechanical definition-of-ready checks
   set_phase.sh             phase changes, approval record, git tag on freeze
   layout.py                reads and enforces project_layout.toml
-  run_gates.sh             layout, compile, VSG jcl, synthesis, tests
+  run_gates.sh             layout, compile, VSG jcl, GHDL synthesis (no latches), tests
+  tool_versions.sh         reports and checks the tool versions
+  env_report.sh            describes the development machine
+  forgejo-ctl              starts, stops and checks Forgejo and its runner
   hooks/deny_paths.py      keeps designer and verifier apart
   hooks/phase_guard.py     where and when each agent may write
 reports/                   gate output, readiness_review.md
@@ -61,16 +72,29 @@ directory, any entity in the wrong unit's directory, more than one entity per
 file, or a unit with a feature file but no tests.
 
 ## One-time setup
-1. Install Claude Code (macOS / Linux / WSL):
+1. **Claude Code** (macOS / Linux / WSL):
    `curl -fsSL https://claude.ai/install.sh | bash`
    (Windows PowerShell: `irm https://claude.ai/install.ps1 | iex`)
-2. Install the tools: Python 3.11+, GHDL, VSG (`pip install vsg`), and
-   optionally Yosys with the GHDL plugin for resource estimates.
-3. `chmod +x tools/*.sh tools/*.py tools/hooks/*.py`
-4. Commit the initial structure:
-   `git add -A && git commit -m "Initial flow and spec" && git push`
-5. Start Claude Code in this folder once (`claude`) and accept the workspace
-   trust prompt. Hooks in the agent files only run in a trusted folder.
+2. **System tools.** The list, with the versions in use, is in the
+   development plan, section 9. Forgejo and its runner are set up as described
+   in `docs/setup/forgejo.md`.
+3. **Python tools**, in a virtual environment at the root of the working copy
+   (`.venv`, not committed):
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   pip install vsg wavedrom        # VSG and WaveDromPy
+   ```
+4. **Scripts executable, and `forgejo-ctl` installed:**
+   ```bash
+   chmod +x tools/*.sh tools/*.py tools/hooks/*.py tools/forgejo-ctl
+   sudo install -m 755 tools/forgejo-ctl /usr/local/bin/forgejo-ctl
+   ```
+5. **Check everything is there:** `tools/tool_versions.sh` lists every tool
+   and exits with an error if a required one is missing or broken.
+6. **Trust the folder:** start Claude Code here once (`claude`) and accept the
+   workspace trust prompt. Hooks in the agent files only run in a trusted
+   folder.
 
 ## Starting a session
 Two things are not started automatically. At the start of every session,
@@ -110,6 +134,12 @@ the specification phase. Nothing can be written to `rtl/` or `tb/` until
     python3 tools/spec_check.py              # ready to leave the spec phase?
     python3 tools/spec_check.py --for-build  # ready to freeze?
     ./tools/run_gates.sh all                 # build-phase gates
+    tools/tool_versions.sh                   # all required tools present and working?
+    tools/env_report.sh                      # what machine is this?
+    forgejo-ctl status                       # Forgejo and runner healthy?
+
+To save a report as evidence, give the script a file name, e.g.
+`tools/tool_versions.sh docs/evidence/m0/tool_versions.txt`.
 
 ## Notes
 - The hooks are guardrails against mistakes, not security boundaries. For an
@@ -119,7 +149,9 @@ the specification phase. Nothing can be written to `rtl/` or `tb/` until
 - Models: architect, rtl-designer, reviewer and orchestrator use `opus`; the
   verification-engineer uses `sonnet` so design and tests come from different
   models. Change the `model:` lines to suit.
-- Yosys numbers are estimates; Vivado is the reference for timing and area.
+- The synthesis gate uses GHDL's own synthesis: it checks that the design is
+  synthesizable and infers no latches. Timing and resource use come from
+  Vivado, from milestone M2.
 
 ## License
 GPL-2.0 - see [LICENSE](LICENSE).
