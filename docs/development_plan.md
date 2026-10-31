@@ -197,7 +197,7 @@ once M1 has been run.
 
 - **`main` is always green**: it only contains work that passed every stage
   required for its change class (7.4) at that milestone.
-- **One short-lived branch per change**, e.g. `cr/001-m1-ptp-rebuild`. The
+- **One short-lived branch per change**, e.g. `cr/001-m1-build-id-uart`. The
   whole life of a change (spec, freeze, build, review) happens on its branch.
 - **Merging is the owner's acceptance gate.** Only the owner merges.
 - **Fast-forward merges only.** `main` moves to exactly the commit that was
