@@ -427,6 +427,31 @@ Windows lab and the test bench; they are planned when M1 is complete.
 
 **Goal:** everything M1 needs exists and is verified, including CI.
 
+**Status** (updated as tasks finish; the task list below is the plan as
+originally fixed)
+
+| Task | Status |
+|---|---|
+| 1. Tools installed, versions recorded | Done: `tools/tool_versions.sh`, `docs/evidence/m0/tool_versions.txt` |
+| 2. Gate protections | Not started |
+| 3. Structured failure reports | Not started |
+| 4. Ownership map and merge policy file | Not started |
+| 5. Policy interview | Not started |
+| 6. Local CI | In progress: Forgejo, control script and runner done (`docs/setup/forgejo.md`); accounts, repository, branch protection, workflow, mirror and `origin` still to do |
+| 7. Verify early (runner user reaches the Windows side) | Not started |
+| 8. Backups | Not started |
+
+**Added during M0** (work the original task list did not foresee):
+
+- Development environment recorded: `tools/env_report.sh`, section 9.2. Done.
+- Moved to Ubuntu 26.04 on a dedicated NVMe drive. Done.
+- Yosys dropped from the toolchain (section 9). Done.
+- `requirements.txt` pinning the Python tools, for CI and for rebuilding
+  `.venv`. Not started.
+- Diagram render script and CI check for out-of-date SVGs (section 11). Not
+  started.
+- Quick latch test on GHDL 5.0.1, confirming the synthesis gate. Not started.
+
 **Tasks**
 
 1. **Tools.** Install the M0 tools (section 9) and record their versions.
