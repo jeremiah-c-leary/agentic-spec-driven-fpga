@@ -332,6 +332,9 @@ forgejo-ctl start             # start the local Forgejo server and its runner
 forgejo-ctl status            # confirm both are running and healthy
 ```
 
+Then read the latest entry in `docs/journal/` (section 13.1) to pick up where
+the last session left off.
+
 - **Python environment.** The project's Python tools are installed in a
   virtual environment, `.venv`, at the root of the working copy (not
   committed). It must be activated **before** Claude Code is started, because
@@ -570,6 +573,34 @@ Recorded for every milestone, in `docs/evidence/mN/`:
 - **Gate results:** the CI history for the change.
 - **Resources:** Vivado utilization (from M2).
 - **Tool versions** for every result.
+
+### 13.1 Daily journal
+
+A short entry for each day worked on the project, in
+`docs/journal/YYYY-MM-DD.md`, following `docs/journal/TEMPLATE.md`.
+
+**Why:** each Claude session (chat or Claude Code) starts without memory of
+the last, so the journal carries continuity between sessions. It also
+records what the plan and git do not: what the work took, what went wrong and
+how it was fixed. That is evidence for the experiment (how hard is this,
+really?) and the raw material for retrospectives and the presentation.
+
+**Template sections:** milestone and time spent; goal for the day; what was
+done; problems and fixes; decisions made; interventions (brief); next steps.
+
+**Rules:**
+
+- **The journal points, it does not duplicate.** It is the narrative, not the
+  source of truth. Decisions are recorded in the plan or decision log, fixes
+  in the setup notes, changes in git; the journal refers to them.
+- **Lessons that belong nowhere else are kept here** (for example, a test
+  environment that could not reproduce the real machine's behaviour).
+- **Interventions** are mentioned in passing and recorded in the intervention
+  log (section 13), which stays the structured record.
+- **Who writes it:** at the end of a session, Claude (chat) drafts the entry
+  from the conversation; the owner reviews and commits it (principle 8). The
+  owner may also write or amend entries by hand.
+- One file per day; a second session on the same day extends that day's file.
 
 ## 14. Risks (M0 and M1)
 
