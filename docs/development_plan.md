@@ -31,6 +31,13 @@ The plan grows with the project, the same way the design does: a *walking
 skeleton*. Each milestone adds only the process it needs.
 
 - Only the current and next milestone are planned in detail.
+- **Before a milestone starts, it is broken into inch-stones:** steps small
+  enough to finish in one session, each with a "done when" that can be
+  checked (ideally by running something) and that leaves a trace (a commit, a
+  report or an evidence file). Inch-stones are numbered `M<n>.<k>`, listed in
+  the milestone's section with their dependencies and status, and referred to
+  by number in the journal. They may be changed as the milestone goes; the
+  retrospective compares those planned with those actually needed.
 - Every milestone ends with a short retrospective: what worked, where the
   process creaked, what to change.
 - The retrospective's conclusions are written into this plan before the next
@@ -430,30 +437,32 @@ Windows lab and the test bench; they are planned when M1 is complete.
 
 **Goal:** everything M1 needs exists and is verified, including CI.
 
-**Status** (updated as tasks finish; the task list below is the plan as
-originally fixed)
+**Inch-stones** (section 2; status updated as they finish)
 
-| Task | Status |
-|---|---|
-| 1. Tools installed, versions recorded | Done: `tools/tool_versions.sh`, `docs/evidence/m0/tool_versions.txt` |
-| 2. Gate protections | Not started |
-| 3. Structured failure reports | Not started |
-| 4. Ownership map and merge policy file | Not started |
-| 5. Policy interview | Not started |
-| 6. Local CI | In progress: Forgejo, control script and runner done (`docs/setup/forgejo.md`); accounts, repository, branch protection, workflow, mirror and `origin` still to do |
-| 7. Verify early (runner user reaches the Windows side) | Not started |
-| 8. Backups | Not started |
+| # | Inch-stone | Done when | Needs | Status |
+|---|---|---|---|---|
+| M0.1 | Tools installed, versions recorded | `tool_versions.sh` passes; report in `docs/evidence/m0/` | | Done |
+| M0.2 | Development environment recorded | `env_report.sh` report saved; section 9.2 | | Done |
+| M0.3 | Forgejo and runner running, under `forgejo-ctl` | `forgejo-ctl status` healthy; `docs/setup/forgejo.md` | | Done |
+| M0.4 | Latch test on GHDL 5.0.1 | `ghdl --synth` rejects a latch design; result saved in `docs/evidence/m0/` | | |
+| M0.5 | `requirements.txt` | `.venv` rebuilt from it, and `tool_versions.sh` passes | | |
+| M0.6 | Forgejo accounts and repository imported | Repository in Forgejo, same `main` commit as GitHub | M0.3 | |
+| M0.7 | Smoke-test workflow | A push runs a job on `wsl-host` that prints its user and GHDL version | M0.6 | |
+| M0.8 | Checks in CI | CI runs the checks that apply before any design exists (version check, spec check, script lint); a deliberately broken check fails the job | M0.5, M0.7 | |
+| M0.9 | Branch protection | A direct push to `main` is refused; a pull request with failing CI cannot merge; only fast-forward merges | M0.8 | |
+| M0.10 | `origin` on Forgejo, GitHub mirror | Pushes go to Forgejo; GitHub updates when the owner triggers the mirror | M0.6 | |
+| M0.11 | Runner reaches the Windows side | A CI job writes and reads a file in the Windows exchange folder | M0.7 | |
+| M0.12 | Gate protections | Each blocked action (writing `spec/PHASE`, editing `tools/`, running `set_phase`, pushing to GitHub) tried once by an agent and blocked | | |
+| M0.13 | Structured failure reports | Format defined; agent instructions updated to use it | | |
+| M0.14 | Policy interview | Merge policy, change classes, exceptions and the M1 open decisions recorded as decisions | | |
+| M0.15 | Ownership map and policy file | Machine-readable; read by the hooks and CI | M0.14 | |
+| M0.16 | Diagram render script and CI check | A stale committed diagram fails CI | M0.8 | |
+| M0.17 | Forgejo backups | Backup taken **and a restore tested** | M0.6 | |
+| M0.18 | M0 retrospective; M1 inch-stones planned | Retrospective written; M1 broken down the same way | all | |
 
-**Added during M0** (work the original task list did not foresee):
-
-- Development environment recorded: `tools/env_report.sh`, section 9.2. Done.
-- Moved to Ubuntu 26.04 on a dedicated NVMe drive. Done.
-- Yosys dropped from the toolchain (section 9). Done.
-- `requirements.txt` pinning the Python tools, for CI and for rebuilding
-  `.venv`. Not started.
-- Diagram render script and CI check for out-of-date SVGs (section 11). Not
-  started.
-- Quick latch test on GHDL 5.0.1, confirming the synthesis gate. Not started.
+Inch-stones M0.2, M0.4, M0.5 and M0.16 were not in the original task list
+below. The move to Ubuntu 26.04 on a dedicated NVMe drive and dropping Yosys
+happened during M0.1.
 
 **Tasks**
 
