@@ -261,7 +261,9 @@ copied to `docs/exceptions.md`.
 
 CI exists from M0, before any design work, so every milestone is built under it.
 
-- **Server:** Forgejo, running in WSL as a service (systemd enabled in WSL).
+- **Server:** Forgejo, running in WSL. It is not started automatically: the
+  owner starts it at the beginning of a session with `forgejo-ctl start`
+  (section 9.1).
 - **Workflows:** in `.forgejo/workflows/`. They only call the project's own
   gate scripts, so all gate logic lives in one place.
 - **Runner:** the Forgejo runner, registered with a `host` label so jobs run
@@ -317,6 +319,54 @@ directory and published per milestone as GitHub Releases. The release
 manifest (design ID, versions, file hashes) is designed so that moving to an
 artifact repository such as Artifactory later would change only where
 releases are stored, not the process.
+
+### 9.1 Starting a session
+
+Two things are not started automatically. At the start of every session,
+from the root of the working copy:
+
+```bash
+cd ~/projects/agentic-spec-driven-fpga
+source .venv/bin/activate     # the project's Python tools (VSG, WaveDromPy, ...)
+forgejo-ctl start             # start the local Forgejo server
+forgejo-ctl status            # confirm it is running
+```
+
+- **Python environment.** The project's Python tools are installed in a
+  virtual environment, `.venv`, at the root of the working copy (not
+  committed). It must be activated **before** Claude Code is started, because
+  the agents' commands inherit the environment of the shell that started it.
+- **Forgejo.** Started by hand rather than on every WSL session, with
+  `/usr/local/bin/forgejo-ctl`, which has three commands: `start`, `status`
+  and `stop`. Without Forgejo, pushes to `origin` and CI do not work.
+- **CI must not depend on the owner's session.** The runner runs as its own
+  user and does not inherit the owner's shell, so CI workflows activate the
+  project's Python environment themselves.
+
+### 9.2 Development environment
+
+The project runs on one Windows PC with WSL2. `tools/env_report.sh` records
+the machine's details; the current report is
+`docs/evidence/m0/environment.txt` (2026-10-30).
+
+| Item | Value |
+|---|---|
+| Processor | AMD Ryzen 7 3700X: 8 cores, 16 logical processors |
+| RAM | 16 GB physical; 7.7 GiB available to Linux (no `.wslconfig`, so WSL defaults to half) |
+| Drive 1 | Samsung 970 EVO, 500 GB NVMe: Windows only |
+| Drive 2 | Samsung 990, 1 TB NVMe: Ubuntu 26.04 (WSL2), the working copy, Vivado |
+| Drive 3 | WD, 2 TB SATA hard drive: additional storage |
+| Windows | 10.0.26200 |
+| WSL | 3.0.3.0, distribution `Ubuntu-26.04` |
+| Linux | Ubuntu 26.04.1 LTS, kernel 6.18.54.1-microsoft-standard-WSL2 |
+
+**Under consideration:**
+
+- **Memory for Vivado.** With 7.7 GiB available to Linux, Vivado will share
+  little memory with everything else from M2. Options: give WSL more of the
+  current 16 GB with a `memory=` setting in `.wslconfig`, or upgrade the RAM
+  (32 GB or more). Decide after measuring memory use during a real build.
+- **GitLab instead of Forgejo**, if the company adopts it and the RAM allows.
 
 ## 10. Directories and ownership
 
@@ -391,7 +441,9 @@ Windows lab and the test bench; they are planned when M1 is complete.
    policy and change classes (7.4), the exception rules (7.6) and the open
    decisions needed for M1 (section 15), recorded as decisions.
 6. **Local CI** (section 8):
-   1. enable systemd in WSL, keep WSL running while working;
+   1. a control script, `forgejo-ctl` (start, status, stop), so Forgejo runs
+      on demand rather than on every WSL session (section 9.1); keep WSL
+      running while working;
    2. install Forgejo, reachable from Windows on `localhost`;
    3. create the owner's account, the agents' push account if chosen (O-6),
       and the repository, imported from GitHub;
@@ -499,7 +551,7 @@ Recorded for every milestone, in `docs/evidence/mN/`:
 | Hooks are guardrails, not walls | A determined agent could reach forbidden files | Logged as known limit; separate Linux user for agents as later hardening |
 | Same model, same blind spots | Design and tests share a misreading | Different models for designer and verifier; reviewer triage; owner's code review |
 | Spec ambiguity | Agents guess | Readiness review; `ASSUMPTIONS.md`; spec gaps stop the build |
-| WSL services stop when WSL idles | CI unavailable | Keep WSL running; check service status at session start |
+| Forgejo not started, or stopped when WSL shuts down | Pushes and CI fail | `forgejo-ctl status` at the start of every session (section 9.1) |
 | Forgejo data loss | Pull-request and CI history lost | Periodic backups of the data directory |
 | Orchestrator leaks details between agents | Independence weakened | Structured failure reports passed unchanged |
 

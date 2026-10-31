@@ -1,0 +1,29 @@
+# Development environment
+# Date:   2026-10-30 19:36:02 CDT
+# Host:   DESKTOP-HV9NHA3
+
+## Processor
+Model                  AMD Ryzen 7 3700X 8-Core Processor
+Physical cores         8 (visible to Linux)
+Logical processors     16 (visible to Linux)
+
+## Memory
+Available to Linux     7.7 GiB
+Swap                   2.0 GiB
+Physical (Windows)     15.9 GiB
+
+## Storage
+Linux root (/)         1007G total, 888G free
+Working copy           /home/jcleary/projects/agentic-spec-driven-fpga
+Physical disks (Windows):
+  - WDC WD20EZAZ-00GGJB0 | SATA | 1,863 GB
+  - Samsung SSD 990 1TB | NVMe | 932 GB
+  - Samsung SSD 970 EVO 500GB | NVMe | 466 GB
+
+## Operating systems
+Linux distribution     Ubuntu 26.04.1 LTS
+Linux kernel           6.18.54.1-microsoft-standard-WSL2
+WSL distribution       Ubuntu-26.04
+Windows                Microsoft Windows [Version 10.0.26200.9711]
+WSL                    WSL version: 3.0.3.0
+.wslconfig             none (WSL defaults: half of physical RAM)
