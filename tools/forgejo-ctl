@@ -13,8 +13,9 @@
 #   sudo install -m 755 tools/forgejo-ctl /usr/local/bin/forgejo-ctl
 #
 # Settings can be overridden with environment variables of the same name.
-# The runner is optional until it has been set up (registered): until then,
-# start and status report it as "not set up" instead of failing.
+# The runner is optional until it has been set up (its configuration file,
+# holding the connection to Forgejo, exists): until then, start and status
+# report it as "not set up" instead of failing.
 # ==============================================================================
 set -u
 
@@ -30,6 +31,7 @@ FORGEJO_START_TIMEOUT=${FORGEJO_START_TIMEOUT:-60}
 RUNNER_BIN=${RUNNER_BIN:-/usr/local/bin/forgejo-runner}
 RUNNER_USER=${RUNNER_USER:-forgejo-runner}
 RUNNER_DIR=${RUNNER_DIR:-/var/lib/forgejo-runner}
+RUNNER_CONFIG=${RUNNER_CONFIG:-$RUNNER_DIR/config.yml}
 RUNNER_LOG=${RUNNER_LOG:-$RUNNER_DIR/runner.log}
 
 # ----------------------------------------------------------------- helpers
@@ -44,13 +46,15 @@ forgejo_http() {
   echo "${code:-000}"
 }
 
-# The runner is set up once its user exists and it has been registered
-# (registration writes a .runner file in its directory).
+# The runner is set up once its user exists and its configuration file exists.
+# Current Forgejo runners are registered by putting the connection (url, uuid,
+# token) from Forgejo's "Create new runner" dialog into that file; there is
+# no separate registration step or .runner file any more.
 # Checked without sudo where permissions allow, otherwise with sudo only if it
 # would not prompt (-n), so status never asks for a password.
 runner_set_up() {
   id "$RUNNER_USER" >/dev/null 2>&1 || return 1
-  [ -f "$RUNNER_DIR/.runner" ] || sudo -n test -f "$RUNNER_DIR/.runner" 2>/dev/null
+  [ -f "$RUNNER_CONFIG" ] || sudo -n test -f "$RUNNER_CONFIG" 2>/dev/null
 }
 
 show_log_tail() {  # show_log_tail <file> <lines>
@@ -106,7 +110,7 @@ start_forgejo() {
 
 start_runner() {
   if ! runner_set_up; then
-    echo "Runner: not set up yet (no user '$RUNNER_USER' or no registration in $RUNNER_DIR); skipped."
+    echo "Runner: not set up yet (no user '$RUNNER_USER' or no $RUNNER_CONFIG); skipped."
     return 0
   fi
   if [ -n "$(runner_pid)" ]; then
@@ -114,12 +118,9 @@ start_runner() {
     return 0
   fi
   echo "Runner: starting..."
-  local cfg=""
-  sudo test -f "$RUNNER_DIR/config.yml" && cfg="--config $RUNNER_DIR/config.yml"
-  # The runner reads its registration (.runner) from its working directory.
   # Same pattern as Forgejo: sudo in the foreground, the runner detached inside.
   if ! sudo -u "$RUNNER_USER" -H bash -c \
-      "cd '$RUNNER_DIR' && exec setsid --fork '$RUNNER_BIN' daemon $cfg \
+      "cd '$RUNNER_DIR' && exec setsid --fork '$RUNNER_BIN' daemon --config '$RUNNER_CONFIG' \
          < /dev/null >> '$RUNNER_LOG' 2>&1"; then
     echo "Runner: FAILED - could not launch it as user '$RUNNER_USER' (sudo failed)."
     return 1
@@ -169,7 +170,7 @@ status() {
     ok=1
   fi
   if ! runner_set_up; then
-    echo "Runner:  not set up (no user '$RUNNER_USER' or not registered)"
+    echo "Runner:  not set up (no user '$RUNNER_USER' or no $RUNNER_CONFIG)"
   elif [ -n "$(runner_pid)" ]; then
     echo "Runner:  RUNNING (PID $(runner_pid))"
   else
