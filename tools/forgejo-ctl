@@ -1,0 +1,217 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# forgejo-ctl - start, stop and check the local Forgejo server and its runner.
+#
+#   forgejo-ctl start      start Forgejo, wait until it answers, then the runner
+#   forgejo-ctl stop       stop the runner, then Forgejo
+#   forgejo-ctl restart    stop, then start
+#   forgejo-ctl status     report both; exit 0 only if everything is healthy
+#   forgejo-ctl logs [forgejo|runner] [lines]   show the end of a log
+#
+# Source of truth: tools/forgejo-ctl in the agentic-spec-driven-fpga
+# repository. Install or update the copy on the PATH with:
+#   sudo install -m 755 tools/forgejo-ctl /usr/local/bin/forgejo-ctl
+#
+# Settings can be overridden with environment variables of the same name.
+# The runner is optional until it has been set up (registered): until then,
+# start and status report it as "not set up" instead of failing.
+# ==============================================================================
+set -u
+
+# ---------------------------------------------------------------- settings
+FORGEJO_BIN=${FORGEJO_BIN:-/usr/local/bin/forgejo}
+FORGEJO_USER=${FORGEJO_USER:-forgejo}
+FORGEJO_CONFIG=${FORGEJO_CONFIG:-/etc/forgejo/app.ini}
+FORGEJO_WORK=${FORGEJO_WORK:-/var/lib/forgejo}
+FORGEJO_LOG=${FORGEJO_LOG:-$FORGEJO_WORK/log/forgejo-ctl.log}
+FORGEJO_URL=${FORGEJO_URL:-http://localhost:3000}
+FORGEJO_START_TIMEOUT=${FORGEJO_START_TIMEOUT:-60}
+
+RUNNER_BIN=${RUNNER_BIN:-/usr/local/bin/forgejo-runner}
+RUNNER_USER=${RUNNER_USER:-forgejo-runner}
+RUNNER_DIR=${RUNNER_DIR:-/var/lib/forgejo-runner}
+RUNNER_LOG=${RUNNER_LOG:-$RUNNER_DIR/runner.log}
+
+# ----------------------------------------------------------------- helpers
+forgejo_pid() { pgrep -u "$FORGEJO_USER" -x forgejo | head -n 1; }
+runner_pid()  { pgrep -u "$RUNNER_USER" -x forgejo-runner 2>/dev/null | head -n 1; }
+
+# HTTP status of Forgejo's health endpoint ("000" if it does not answer).
+forgejo_http() {
+  # curl prints 000 itself when nothing answers; never append a second code.
+  local code
+  code=$(curl -s -o /dev/null -m 5 -w '%{http_code}' "$FORGEJO_URL/api/healthz" 2>/dev/null)
+  echo "${code:-000}"
+}
+
+# The runner is set up once its user exists and it has been registered
+# (registration writes a .runner file in its directory).
+# Checked without sudo where permissions allow, otherwise with sudo only if it
+# would not prompt (-n), so status never asks for a password.
+runner_set_up() {
+  id "$RUNNER_USER" >/dev/null 2>&1 || return 1
+  [ -f "$RUNNER_DIR/.runner" ] || sudo -n test -f "$RUNNER_DIR/.runner" 2>/dev/null
+}
+
+show_log_tail() {  # show_log_tail <file> <lines>
+  echo "--- last $2 lines of $1 ---"
+  sudo tail -n "$2" "$1" 2>/dev/null || echo "(log not readable or not created yet)"
+}
+
+# ------------------------------------------------------------------ start
+start_forgejo() {
+  if [ -n "$(forgejo_pid)" ]; then
+    echo "Forgejo: already running (PID $(forgejo_pid))."
+    return 0
+  fi
+  if [ "$(forgejo_http)" != "000" ]; then
+    echo "Forgejo: FAILED - something else is already answering at $FORGEJO_URL."
+    echo "         Find it with: ss -ltnp | grep ':${FORGEJO_URL##*:}'"
+    return 1
+  fi
+  echo "Forgejo: starting..."
+  sudo -u "$FORGEJO_USER" mkdir -p "$(dirname "$FORGEJO_LOG")"
+  # Run as the forgejo user, from / (not a home directory), with its own HOME
+  # (-H). The forgejo user writes its own log, which it owns.
+  # sudo runs in the foreground, in this terminal, where its password is
+  # cached (Ubuntu caches sudo per terminal, so a detached sudo would need the
+  # password again and fail silently). Inside sudo, Forgejo is detached:
+  # setsid --fork (new session, launcher returns at once), no input, output
+  # only to its log. Nothing holds the terminal, so sudo returns at once (even
+  # with sudo's use_pty) and no parent process is left behind.
+  if ! sudo -u "$FORGEJO_USER" -H bash -c \
+      "cd / && exec setsid --fork '$FORGEJO_BIN' web --config '$FORGEJO_CONFIG' \
+         < /dev/null >> '$FORGEJO_LOG' 2>&1"; then
+    echo "Forgejo: FAILED - could not launch it as user '$FORGEJO_USER' (sudo failed)."
+    return 1
+  fi
+  local waited=0
+  while [ "$waited" -lt "$FORGEJO_START_TIMEOUT" ]; do
+    sleep 2; waited=$((waited + 2))
+    # Success needs both: our own Forgejo process alive AND a healthy answer.
+    if [ -z "$(forgejo_pid)" ]; then
+      echo "Forgejo: FAILED - the process exited during start-up."
+      show_log_tail "$FORGEJO_LOG" 20
+      return 1
+    fi
+    if [ "$(forgejo_http)" = "200" ]; then
+      echo "Forgejo: running (PID $(forgejo_pid)), answering at $FORGEJO_URL"
+      return 0
+    fi
+  done
+  echo "Forgejo: FAILED - no answer from $FORGEJO_URL after ${FORGEJO_START_TIMEOUT}s."
+  show_log_tail "$FORGEJO_LOG" 20
+  return 1
+}
+
+start_runner() {
+  if ! runner_set_up; then
+    echo "Runner: not set up yet (no user '$RUNNER_USER' or no registration in $RUNNER_DIR); skipped."
+    return 0
+  fi
+  if [ -n "$(runner_pid)" ]; then
+    echo "Runner: already running (PID $(runner_pid))."
+    return 0
+  fi
+  echo "Runner: starting..."
+  local cfg=""
+  sudo test -f "$RUNNER_DIR/config.yml" && cfg="--config $RUNNER_DIR/config.yml"
+  # The runner reads its registration (.runner) from its working directory.
+  # Same pattern as Forgejo: sudo in the foreground, the runner detached inside.
+  if ! sudo -u "$RUNNER_USER" -H bash -c \
+      "cd '$RUNNER_DIR' && exec setsid --fork '$RUNNER_BIN' daemon $cfg \
+         < /dev/null >> '$RUNNER_LOG' 2>&1"; then
+    echo "Runner: FAILED - could not launch it as user '$RUNNER_USER' (sudo failed)."
+    return 1
+  fi
+  sleep 3
+  if [ -n "$(runner_pid)" ]; then
+    echo "Runner: running (PID $(runner_pid))."
+    return 0
+  fi
+  echo "Runner: FAILED - the process exited during start-up."
+  show_log_tail "$RUNNER_LOG" 20
+  return 1
+}
+
+# ------------------------------------------------------------------- stop
+stop_process() {  # stop_process <name> <user> <process-name>
+  local name=$1 user=$2 proc=$3 waited=0
+  if [ -z "$(pgrep -u "$user" -x "$proc" 2>/dev/null)" ]; then
+    echo "$name: not running."
+    return 0
+  fi
+  echo "$name: stopping..."
+  sudo pkill -u "$user" -x "$proc"
+  while [ -n "$(pgrep -u "$user" -x "$proc" 2>/dev/null)" ] && [ "$waited" -lt 15 ]; do
+    sleep 1; waited=$((waited + 1))
+  done
+  if [ -n "$(pgrep -u "$user" -x "$proc" 2>/dev/null)" ]; then
+    echo "$name: did not stop within 15s."
+    return 1
+  fi
+  echo "$name: stopped."
+}
+
+# ----------------------------------------------------------------- status
+status() {
+  local ok=0 code
+  if [ -n "$(forgejo_pid)" ]; then
+    code=$(forgejo_http)
+    if [ "$code" = "200" ]; then
+      echo "Forgejo: RUNNING (PID $(forgejo_pid)), healthy at $FORGEJO_URL"
+    else
+      echo "Forgejo: RUNNING (PID $(forgejo_pid)) but NOT ANSWERING at $FORGEJO_URL (HTTP $code)"
+      ok=1
+    fi
+  else
+    echo "Forgejo: STOPPED"
+    ok=1
+  fi
+  if ! runner_set_up; then
+    echo "Runner:  not set up (no user '$RUNNER_USER' or not registered)"
+  elif [ -n "$(runner_pid)" ]; then
+    echo "Runner:  RUNNING (PID $(runner_pid))"
+  else
+    echo "Runner:  STOPPED"
+    ok=1
+  fi
+  echo "Logs:    $FORGEJO_LOG"
+  echo "         $RUNNER_LOG"
+  return $ok
+}
+
+# ------------------------------------------------------------------- main
+case "${1:-}" in
+  start)
+    sudo -v || { echo "sudo is required."; exit 1; }   # ask for the password now, in the foreground
+    start_forgejo && start_runner
+    ;;
+  stop)
+    sudo -v || { echo "sudo is required."; exit 1; }
+    stop_process "Runner" "$RUNNER_USER" forgejo-runner
+    stop_process "Forgejo" "$FORGEJO_USER" forgejo
+    ;;
+  restart)
+    sudo -v || { echo "sudo is required."; exit 1; }
+    stop_process "Runner" "$RUNNER_USER" forgejo-runner
+    stop_process "Forgejo" "$FORGEJO_USER" forgejo
+    sleep 1
+    start_forgejo && start_runner
+    ;;
+  status)
+    status
+    ;;
+  logs)
+    which=${2:-forgejo}; lines=${3:-50}
+    case "$which" in
+      forgejo) show_log_tail "$FORGEJO_LOG" "$lines" ;;
+      runner)  show_log_tail "$RUNNER_LOG" "$lines" ;;
+      *) echo "Usage: $0 logs [forgejo|runner] [lines]"; exit 1 ;;
+    esac
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|status|logs [forgejo|runner] [lines]}"
+    exit 1
+    ;;
+esac
